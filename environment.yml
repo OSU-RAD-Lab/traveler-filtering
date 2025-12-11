@@ -1,0 +1,11 @@
+name: sand-sieve
+channels:
+- conda-forge
+- nodefaults
+dependencies:
+- python 3.12.*
+- pinocchio >=3.8.0,<4
+- matplotlib >=3.10.8,<4
+- numpy >=2.3.5,<3
+- meshcat-python >=0.3.2,<0.4
+

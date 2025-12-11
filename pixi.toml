@@ -1,0 +1,17 @@
+[workspace]
+authors = ["gandres42 <gandres2416@gmail.com>"]
+channels = ["conda-forge"]
+name = "sand-sieve"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[tasks]
+dynamics = "python py/main.py"
+filtering = "python py/motor.py"
+
+[dependencies]
+python = "3.12.*"
+pinocchio = ">=3.8.0,<4"
+matplotlib = ">=3.10.8,<4"
+numpy = ">=2.3.5,<3"
+meshcat-python = ">=0.3.2,<0.4"
