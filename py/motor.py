@@ -19,7 +19,7 @@ def butter_lowpass_filter(data, cutoff, fs, order=4):
     b, a = butter(order, normal_cutoff, btype='low', analog=False)
     return filtfilt(b, a, data)
 
-def noise_subtraction(t, tau, theta):
+def noise_subtraction(t, tau, theta,PHASE_FLIP=False):
     slope_sign = np.gradient(savgol_filter(theta, window_length=700, polyorder=3), t) > 0
     smooth_theta_a = savgol_filter(theta, window_length=500, polyorder=3)
     if PHASE_FLIP:
@@ -53,7 +53,7 @@ def noise_subtraction(t, tau, theta):
     # subtract motor noise from tau
     denoised = tau - scaled_diffs
 
-    return denoised, scaled_diffs
+    return denoised, scaled_diffs, crossing_indices
 
 def endpoints(t, tau, theta):
     slope_sign = np.gradient(savgol_filter(theta, window_length=700, polyorder=3), t) > 0
@@ -83,17 +83,17 @@ def endpoints(t, tau, theta):
     
     return endpoint_line
 
+data = np.loadtxt('data/raw/vertical_in.csv', delimiter=',', encoding='utf-8-sig', skiprows=4)
 # data = np.loadtxt('data/raw/horizontal_in.csv', delimiter=',', encoding='utf-8-sig', skiprows=4)
 # data = np.loadtxt('data/raw/horizontal_out.csv', delimiter=',', encoding='utf-8-sig', skiprows=4)
 # data = np.loadtxt('data/raw/diag_out.csv', delimiter=',', encoding='utf-8-sig', skiprows=4)
 # data = np.loadtxt('data/10cmshearnoleg.csv', delimiter=',', encoding='utf-8-sig', skiprows=4)
-data = np.loadtxt('data/nolegpentration.csv', delimiter=',', encoding='utf-8-sig', skiprows=4)
-PHASE_FLIP = True
+# data = np.loadtxt('data/nolegpentration.csv', delimiter=',', encoding='utf-8-sig', skiprows=4)
 START = 3000
-END = -7500
+END = -2000
 
 START = 3000
-END = -7000
+END = -2000
 
 t = data[START:END, 0]
 theta_a = data[START:END, 9]
@@ -101,11 +101,18 @@ theta_b = data[START:END, 10]
 tau_a = data[START:END, 11]
 tau_b = data[START:END, 12]
 
-denoised, noise = noise_subtraction(t, tau_a, theta_a)
+denoised, noise, crossings = noise_subtraction(t, tau_a, theta_a,True)
+denoised2, noise2, crossings2 = noise_subtraction(t, tau_b, theta_b,False)
 # denoised = endpoints(t, tau_a, theta_a)
 
 plt.plot(t[800:], tau_a[800:], label='raw torque')
 plt.plot(t[800:], denoised[800:], label='denoised torque')
+plt.vlines(t[crossings], color='gray', linestyle='--', label='crossings A',ymin = min(tau_a), ymax = max(tau_a))
+plt.legend()
+
+plt.figure()
+plt.plot(t[800:], tau_b[800:], label='raw torque')
+plt.plot(t[800:], denoised2[800:], label='denoised torque')
 # plt.plot(t[800:], noise[800:], label='motor noise')
 
 # t = data[START:END, 0]
